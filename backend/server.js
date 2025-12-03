@@ -1,0 +1,37 @@
+// server.js - CLEAN VERSION
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
+const authRoutes = require('./routes/authRoute');
+
+const app = express();
+
+// Connect to MongoDB directly
+mongoose.connect('mongodb://localhost:27017/userproduct')
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.log('❌ MongoDB Error:', err));
+
+// CORS
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
+// Body parser
+app.use(express.json());
+
+// Routes
+app.use('/api/auth', authRoutes);
+
+// Test route
+app.get('/api/test', (req, res) => {
+  res.json({ success: true, message: 'API working!' });
+});
+
+// Start server
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
