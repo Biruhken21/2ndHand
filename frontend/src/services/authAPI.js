@@ -1,18 +1,28 @@
-// services/authAPI.js
 import axios from 'axios';
 
-// ⚠️ IMPORTANT: Use '/api' NOT the full localhost:5000 URL
 const API = axios.create({
-  baseURL: '/api',  // This will go through Vite proxy to localhost:5000
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  timeout: 10000,
 });
 
-// Request interceptor to add token
+// Request interceptor - UPDATED for FormData support
 API.interceptors.request.use(
   (config) => {
+    console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    
+    // Handle FormData differently - don't log binary data
+    if (config.data instanceof FormData) {
+      console.log('Request: FormData with', Array.from(config.data.entries()).length, 'entries');
+      // For FormData, remove Content-Type header so browser sets it with boundary
+      delete config.headers['Content-Type'];
+    } else {
+      console.log('Request data:', config.data);
+    }
+    
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -20,20 +30,69 @@ API.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('❌ Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor for error handling
+// Response interceptor
 API.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    console.log(`✅ ${response.status} ${response.config.url}`);
+    console.log('Response data:', response.data);
+    return response.data;
+  },
   (error) => {
-    const errorMessage = error.response?.data?.message || 'Something went wrong';
-    return Promise.reject(errorMessage);
+    console.error('❌ API Error Full Details:', {
+      URL: error.config?.url,
+      Method: error.config?.method,
+      Status: error.response?.status,
+      StatusText: error.response?.statusText,
+      Data: error.response?.data,
+      Message: error.message,
+      Code: error.code
+    });
+
+    if (error.response?.data?.errors) {
+      console.error('📋 Validation Errors:', error.response.data.errors);
+    }
+
+    // Extract error message
+    let errorMessage = 'Something went wrong';
+    
+    if (error.response) {
+      const { data, status } = error.response;
+      
+      if (status === 401) {
+        errorMessage = data?.message || 'Unauthorized. Please check your credentials.';
+      } else if (status === 400) {
+        errorMessage = data?.message || 'Bad request. Please check your input.';
+      } else if (status === 500) {
+        errorMessage = data?.message || 'Server error. Please try again later.';
+      } else if (data?.message) {
+        errorMessage = data.message;
+      } else if (data?.errors) {
+        const errors = Array.isArray(data.errors) 
+          ? data.errors.map(err => err.message || err).join(', ')
+          : JSON.stringify(data.errors);
+        errorMessage = `Validation errors: ${errors}`;
+      }
+    } else if (error.request) {
+      errorMessage = 'No response from server. Please check if backend is running.';
+    } else {
+      errorMessage = error.message || 'Network error';
+    }
+    
+    return Promise.reject({
+      message: errorMessage,
+      status: error.response?.status,
+      data: error.response?.data,
+      originalError: error
+    });
   }
 );
 
-// Auth API functions
+// Auth API
 export const authAPI = {
   register: (userData) => API.post('/auth/register', userData),
   login: (credentials) => API.post('/auth/login', credentials),
@@ -41,6 +100,14 @@ export const authAPI = {
   getProfile: () => API.get('/auth/me'),
   updateProfile: (userData) => API.put('/auth/profile', userData),
   test: () => API.get('/auth/test'),
+};
+
+// Product API - ONLY createProduct as requested
+export const productAPI = {
+  createProduct: (formData) => {
+    // FormData will automatically set Content-Type with boundary
+    return API.post('/products', formData);
+  }
 };
 
 export default API;

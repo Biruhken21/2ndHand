@@ -89,7 +89,7 @@ const Login = () => {
       // toast.success('Login successful!');
       
       // Redirect to dashboard or home page
-      navigate('/');
+      navigate('/dashboard');
       
     } catch (error) {
       console.error('Login error:', error);

@@ -1,68 +1,82 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+
 exports.protect = async (req, res, next) => {
-  try {
-    console.log('=== PROTECT MIDDLEWARE CALLED ===');
-    console.log('Authorization header:', req.headers.authorization);
-    console.log('Cookies:', req.cookies);
-    
-    let token;
+  let token;
 
-    // Get token from header
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-      console.log('Token from header:', token ? 'YES' : 'NO');
-    } 
-    // Get token from cookie
-    else if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
-      console.log('Token from cookie:', token ? 'YES' : 'NO');
-    }
+  console.log('=== AUTH DEBUG ===');
+  console.log('1. Checking cookies:', req.cookies);
+  console.log('2. Checking auth header:', req.headers.authorization);
 
-    // Check if token exists
-    if (!token) {
-      console.log(' NO TOKEN FOUND');
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized to access this route'
-      });
-    }
+  // METHOD 1: Get token from COOKIE (for web browsers)
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+    console.log('✓ Token found in COOKIE');
+  }
 
-    console.log('Token found, verifying...');
-    
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log(' Token decoded:', decoded);
-      
-      // Get user from token
-      req.user = await User.findById(decoded.userId);
-      
-      if (!req.user) {
-        console.log(' USER NOT FOUND IN DATABASE');
-        return res.status(401).json({
-          success: false,
-          message: 'User not found'
-        });
-      }
+  // METHOD 2: Get token from Authorization header (for Postman/mobile apps)
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+    console.log('✓ Token found in AUTHORIZATION HEADER');
+  }
 
-      console.log(' User found:', req.user.email);
-      console.log('User ID:', req.user._id);
-      
-      next();
-    } catch (error) {
-      console.log('TOKEN VERIFICATION FAILED:', error.message);
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized to access this route',
-        error: error.message // Add for debugging
-      });
-    }
-  } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(500).json({
+  // METHOD 3: (Optional) Get token from query string
+  if (!token && req.query.token) {
+    token = req.query.token;
+    console.log('✓ Token found in QUERY STRING');
+  }
+
+  // Check if token exists anywhere
+  console.log('3. Final token status:', token ? 'FOUND' : 'NOT FOUND');
+  
+  if (!token) {
+    return res.status(401).json({
       success: false,
-      message: 'Server error in authentication'
+      message: 'Please login to access this resource. No authentication token found.'
+    });
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('4. Token decoded successfully. User ID:', decoded.userId);
+    
+    // Get user from token
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (!user) {
+      console.log('5. User not found in database');
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    console.log('6. Authentication SUCCESS. User:', user.email);
+    req.user = user;
+    next();
+  } catch (error) {
+    console.log('7. Token verification ERROR:', error.name, '-', error.message);
+    
+    // Handle specific JWT errors
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({
+        success: false,
+        message: 'Token expired. Please login again'
+      });
+    }
+
+    // For other errors
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication failed'
     });
   }
 };

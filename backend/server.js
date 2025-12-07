@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoute');
+const productRoutes = require('./routes/productRoute');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

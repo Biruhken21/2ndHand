@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Mail, Lock, Check } from 'lucide-react';
+import { Eye, EyeOff, User, Phone } from 'lucide-react';
 import { authAPI } from '/src/services/authAPI.js';
 
 const Register = () => {
@@ -9,6 +9,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '', // ADDED: Phone field
     password: '',
     confirmPassword: '',
     terms: false,
@@ -33,6 +34,22 @@ const Register = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
+    
+    // ADDED: Phone validation
+    if (!formData.phone) {
+  newErrors.phone = 'Phone number is required';
+} else {
+  // Clean for checking length only
+  const cleanedPhone = formData.phone.replace(/\D/g, '');
+  
+  if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
+    newErrors.phone = 'Phone number must be between 10 and 15 digits';
+  } else if (!/^(0[79]|0|\+251[79]|\+251)/.test(formData.phone)) {
+    // Check format without removing leading 0
+    newErrors.phone = 'Please enter a valid Ethiopian phone number starting with 07, 09, or +251';
+  }
+}
+
     
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -69,6 +86,7 @@ const Register = () => {
       const userData = {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone, // ADDED: Include phone
         password: formData.password
       };
       
@@ -93,7 +111,7 @@ const Register = () => {
           
           // Auto-redirect to dashboard
           setTimeout(() => {
-            navigate('/');
+            navigate('/dashboard');
           }, 1500);
         } else {
           // Redirect to login page
@@ -106,6 +124,7 @@ const Register = () => {
         setFormData({
           name: '',
           email: '',
+          phone: '', // ADDED: Clear phone
           password: '',
           confirmPassword: '',
           terms: false,
@@ -116,19 +135,53 @@ const Register = () => {
       
     } catch (error) {
       console.error('Registration error details:', error);
-      
       let errorMessage = 'Registration failed. Please try again.';
-      
-      if (error.includes('already exists')) {
-        errorMessage = 'An account with this email already exists.';
-      } else if (error.includes('Invalid') || error.includes('invalid')) {
-        errorMessage = 'Invalid input. Please check your information.';
-      } else if (error.includes('Network') || error.includes('timeout')) {
-        errorMessage = 'Cannot connect to server. Please check: \n1. Backend is running on port 5000\n2. Your internet connection';
-      } else if (error.includes('500') || error.includes('Server error')) {
-        errorMessage = 'Server error. Please try again later.';
+
+      // Handle our API wrapper structured error: { message, status, data, originalError }
+      if (error && typeof error === 'object') {
+        // Prefer explicit message on the wrapper
+        if (error.message && error.status) {
+          errorMessage = error.message;
+
+          // If backend included a `data` payload with `errors` array, join them
+          if (error.data && error.data.errors) {
+            errorMessage = Array.isArray(error.data.errors)
+              ? error.data.errors.map(e => e.message || e).join(', ')
+              : String(error.data.errors);
+          } else if (error.data && error.data.message) {
+            errorMessage = error.data.message;
+          }
+        }
+
+        // Axios raw error shape (in case it was not wrapped)
+        else if (error.response && error.response.data) {
+          const d = error.response.data;
+          if (d.errors) {
+            errorMessage = Array.isArray(d.errors) ? d.errors.map(e => e.message || e).join(', ') : String(d.errors);
+          } else if (d.message) {
+            errorMessage = d.message;
+          }
+        }
+        
+        // If we still have an errors array at top-level
+        else if (error.errors) {
+          errorMessage = Array.isArray(error.errors) ? error.errors.map(e => e.message || e).join(', ') : String(error.errors);
+        }
       }
-      
+
+      // Fallback for string errors
+      if (typeof error === 'string') {
+        if (error.toLowerCase().includes('already exists') || error.toLowerCase().includes('already in use')) {
+          errorMessage = 'An account with this email already exists.';
+        } else if (error.toLowerCase().includes('invalid')) {
+          errorMessage = 'Invalid input. Please check your information.';
+        } else if (error.toLowerCase().includes('network') || error.toLowerCase().includes('timeout')) {
+          errorMessage = 'Cannot connect to server. Please check: \n1. Backend is running on port 5000\n2. Your internet connection';
+        } else if (error.toLowerCase().includes('500') || error.toLowerCase().includes('server error')) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+      }
+
       setApiError(errorMessage);
       
       // Clear passwords for security
@@ -145,9 +198,17 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Format phone number as user types
+    let processedValue = value;
+    if (name === 'phone') {
+      // Remove all non-digits for validation, but show formatted
+      processedValue = value.replace(/\D/g, '');
+    }
+    
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? checked : processedValue,
     });
     
     if (errors[name]) {
@@ -158,6 +219,17 @@ const Register = () => {
     }
     if (apiError) setApiError('');
     if (success) setSuccess('');
+  };
+
+  // Format phone for display
+  const formatPhoneDisplay = (phone) => {
+    if (!phone) return '';
+    const cleaned = phone.replace(/\D/g, '');
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phone;
   };
 
   // Test backend connection
@@ -194,7 +266,7 @@ const Register = () => {
             {/* Error Message */}
             {apiError && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-700">{apiError}</p>
+                <p className="text-sm text-red-700 whitespace-pre-line">{apiError}</p>
               </div>
             )}
 
@@ -236,6 +308,25 @@ const Register = () => {
                   disabled={isLoading}
                 />
                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              </div>
+
+              {/* Phone Input - ADDED */}
+              <div>
+                <div className="flex items-center">
+                  <Phone className="h-5 w-5 text-gray-400 mr-2" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formatPhoneDisplay(formData.phone)}
+                    onChange={handleChange}
+                    placeholder="Phone Number (e.g., 1234567890)"
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                    disabled={isLoading}
+                  />
+                </div>
+                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
               </div>
 
               {/* Password Input */}

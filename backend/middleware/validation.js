@@ -19,7 +19,7 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-// Register validation rules
+// Register validation rules - SIMPLIFIED (Phone validation in User.js only)
 const validateRegister = [
   body('name')
     .trim()
@@ -43,13 +43,17 @@ const validateRegister = [
       }
     }),
 
+  // SIMPLE phone validation only - detailed validation in User.js
+  body('phone')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number is required'),
+
   body('password')
     .notEmpty()
     .withMessage('Password is required')
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .withMessage('Password must be at least 6 characters'),
 
   body('confirmPassword')
     .optional()
@@ -102,6 +106,13 @@ const validateUpdateProfile = [
       }
     }),
 
+  // Simple phone validation for updates
+  body('phone')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number cannot be empty'),
+
   handleValidationErrors
 ];
 
@@ -115,9 +126,7 @@ const validateChangePassword = [
     .notEmpty()
     .withMessage('New password is required')
     .isLength({ min: 6 })
-    .withMessage('New password must be at least 6 characters')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('New password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .withMessage('New password must be at least 6 characters'),
 
   body('confirmPassword')
     .custom((value, { req }) => {
