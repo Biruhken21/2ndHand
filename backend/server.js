@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/authRoute');
 const productRoutes = require('./routes/productRoute');
+const adminRoutes = require('./routes/adminRoute');
 
 const app = express();
 
@@ -16,7 +17,7 @@ mongoose.connect('mongodb://localhost:27017/userproduct')
 
 // CORS
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true
 }));
 
@@ -26,6 +27,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

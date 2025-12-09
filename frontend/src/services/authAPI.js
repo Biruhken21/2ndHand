@@ -65,8 +65,12 @@ API.interceptors.response.use(
       
       if (status === 401) {
         errorMessage = data?.message || 'Unauthorized. Please check your credentials.';
+      } else if (status === 403) {
+        errorMessage = data?.message || 'Access denied. Admin privileges required.';
       } else if (status === 400) {
         errorMessage = data?.message || 'Bad request. Please check your input.';
+      } else if (status === 404) {
+        errorMessage = data?.message || 'Resource not found.';
       } else if (status === 500) {
         errorMessage = data?.message || 'Server error. Please try again later.';
       } else if (data?.message) {
@@ -102,11 +106,43 @@ export const authAPI = {
   test: () => API.get('/auth/test'),
 };
 
-// Product API - ONLY createProduct as requested
+// Product API
 export const productAPI = {
   createProduct: (formData) => {
-    // FormData will automatically set Content-Type with boundary
     return API.post('/products', formData);
+  },
+  getApprovedProducts: (params) => API.get('/products', { params }),
+  markAsSold: (id) => API.put(`/products/${id}/sold`)
+};
+
+// ==================== ADMIN API ====================
+export const adminAPI = {
+  // Product Management
+  getPendingProducts: (params = {}) => API.get('/admin/products/pending', { params }),
+  approveProduct: (id, action, reason) => 
+    API.put(`/admin/products/${id}/approve`, { action, reason }),
+  
+  getAllProducts: (params = {}) => API.get('/admin/products', { params }),
+  
+  // User Management
+  getAllUsers: (params = {}) => API.get('/admin/users', { params }),
+  
+  // Inquiry Management
+  getAllInquiries: (params = {}) => API.get('/admin/inquiries', { params }),
+  
+  // Helper to check if user is admin (based on token)
+  isAdminUser: () => {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    
+    try {
+      // Decode JWT token to check role (client-side check only)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role === 'admin' || payload.user?.role === 'admin';
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
   }
 };
 

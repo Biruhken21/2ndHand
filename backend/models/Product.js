@@ -22,10 +22,10 @@ const productSchema = new mongoose.Schema({
     enum: ['fixed', 'negotiable'],
     default: 'fixed'
   },
-  category: {
+    category: {
     type: String,
-    required: [true, 'Category is required'],
-    enum: ['electronics', 'vehicles', 'properties', 'services', 'other']
+    enum: ['electronics', 'smartphones', 'gaming', 'furniture', 'vehicles', 'home', 'fashion', 'appliances', 'sports', 'musical', 'collectibles', 'services', 'other'],
+    required: [ true, 'Category is required']
   },
   location: {
     type: String,

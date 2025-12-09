@@ -3,50 +3,29 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const { admin } = require('../middleware/role');
 const {
-  // Dashboard
-  getDashboardStats,
-  
-  // Product Management
   getPendingProducts,
-  getAllProducts,
-  getProductById,
   approveProduct,
-  updateProduct,
-  deleteProduct,
-  
-  // Inquiry Management
-  getAllInquiries,
-  updateInquiryStatus,
-  
-  // User Management
+  getAllProducts,
   getAllUsers,
-  updateUser
+  getAllInquiries
 } = require('../controllers/adminController');
 
-// All admin routes require authentication and admin role
-router.use(protect);
-router.use(admin);
+// =================== PRODUCT MANAGEMENT ===================
+// Get pending products for approval (admin only)
+router.get('/products/pending', protect, admin, getPendingProducts);
 
-// ==================== DASHBOARD ====================
-router.get('/dashboard/stats', getDashboardStats);
+// Approve or reject pending product (admin only)
+router.put('/products/:id/approve', protect, admin, approveProduct);
 
-// ==================== PRODUCT MANAGEMENT ====================
-// Product approval
-router.get('/products/pending', getPendingProducts);
-router.put('/products/:id/approve', approveProduct);
+// Get all products (admin view with filters)
+router.get('/products', protect, admin, getAllProducts);
 
-// Product CRUD
-router.get('/products', getAllProducts);
-router.get('/products/:id', getProductById);
-router.put('/products/:id', updateProduct);
-router.delete('/products/:id', deleteProduct);
+// =================== USER MANAGEMENT ===================
+// Get all users (admin only)
+router.get('/users', protect, admin, getAllUsers);
 
-// ==================== INQUIRY MANAGEMENT ====================
-router.get('/inquiries', getAllInquiries);
-router.put('/inquiries/:inquiryId', updateInquiryStatus);
-
-// ==================== USER MANAGEMENT ====================
-router.get('/users', getAllUsers);
-router.put('/users/:id', updateUser);
+// =================== INQUIRY MANAGEMENT ===================
+// Get all inquiries (admin only)
+router.get('/inquiries', protect, admin, getAllInquiries);
 
 module.exports = router;
