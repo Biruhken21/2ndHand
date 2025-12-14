@@ -1,177 +1,306 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Truck, Shield, Star, ArrowRight, Search } from 'lucide-react';
+import { 
+  ShieldCheck, 
+  UserCheck, 
+  Users, 
+  PackageCheck,
+  Zap,
+  ArrowRight,
+  CheckCircle,
+  Star,
+  Sparkles,
+  Award,
+  BadgeCheck,
+  TrendingUp,
+  HeadphonesIcon,
+  Briefcase
+} from 'lucide-react';
 
 const Home = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-
   const features = [
     {
-      icon: <ShoppingBag className="h-8 w-8" />,
-      title: "Easy Shopping",
-      description: "Browse thousands of products with our intuitive interface",
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      icon: <Truck className="h-8 w-8" />,
-      title: "Fast Delivery",
-      description: "Get your orders delivered within 24 hours in major cities",
+      icon: <ShieldCheck className="h-8 w-8" />,
+      title: "Approved Products",
+      desc: "Technically verified items",
       color: "from-blue-500 to-cyan-500",
+      highlight: "Quality Guaranteed"
     },
     {
-      icon: <Shield className="h-8 w-8" />,
-      title: "Secure Payments",
-      description: "100% secure payment methods with end-to-end encryption",
-      color: "from-green-500 to-emerald-500",
+      icon: <UserCheck className="h-8 w-8" />,
+      title: "Verified Sellers",
+      desc: "Trusted professionals only",
+      color: "from-emerald-500 to-green-500",
+      highlight: "100% Verified"
     },
     {
-      icon: <Star className="h-8 w-8" />,
-      title: "Premium Quality",
-      description: "All products are verified for quality and authenticity",
-      color: "from-orange-500 to-red-500",
+      icon: <Users className="h-8 w-8" />,
+      title: "Expert Guidance",
+      desc: "Technical team support",
+      color: "from-purple-500 to-pink-500",
+      highlight: "24/7 Support"
     },
+    {
+      icon: <Briefcase className="h-8 w-8" />,
+      title: "Broker System",
+      desc: "Coming soon",
+      color: "from-amber-500 to-orange-500",
+      highlight: "Launching 2024"
+    }
   ];
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
-      // Implement search functionality here
-    }
-  };
+  const stats = [
+    { number: "10K+", label: "Approved Products", icon: <PackageCheck className="h-5 w-5" /> },
+    { number: "2.5K+", label: "Verified Sellers", icon: <BadgeCheck className="h-5 w-5" /> },
+    { number: "99%", label: "Satisfaction Rate", icon: <Star className="h-5 w-5" /> },
+    { number: "24/7", label: "Expert Support", icon: <HeadphonesIcon className="h-5 w-5" /> }
+  ];
+
+  const upcomingFeatures = [
+    { name: "Broker Marketplace", status: "Q2 2024", icon: <Briefcase className="h-5 w-5" /> },
+    { name: "Service Technicians", status: "Q3 2024", icon: <Users className="h-5 w-5" /> },
+    { name: "Enterprise Solutions", status: "Q4 2024", icon: <TrendingUp className="h-5 w-5" /> }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
-      {/* Hero Section with Search */}
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-5"></div>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/50" />
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]" />
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Discover Amazing
+            {/* Trust Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 mb-8">
+              <Award className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-semibold text-gray-700">Technically-Verified Marketplace</span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+              Shop With
+              <span className="block mt-2">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+                  Expert Confidence
+                </span>
               </span>
-              <br />
-              <span className="text-gray-900">Products</span>
             </h1>
-            
-            <p className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto">
-              Find everything you need with our powerful search and curated collections
+
+            {/* Subtitle */}
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+              Verified products. Trusted sellers. Technical guidance. All in one place.
             </p>
-            
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="mt-10 max-w-2xl mx-auto">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for products, brands, or categories..."
-                  className="w-full pl-12 pr-4 py-4 text-lg rounded-2xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-500/30 focus:border-purple-500 shadow-lg transition-all duration-200"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
-                >
-                  Search
-                </button>
-              </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-3">
-                <span className="text-sm text-gray-500">Popular searches:</span>
-                {['Electronics', 'Fashion', 'Home Decor', 'Books', 'Fitness'].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setSearchQuery(tag)}
-                    className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors duration-200"
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </form>
-            
-            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 to="/products"
-                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
+                className="group relative px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-2xl hover:shadow-blue-500/25 transition-all duration-300"
               >
-                Browse All Products
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <span className="relative flex items-center">
+                  Explore Products
+                  <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </span>
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-purple-600 bg-white border-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+                className="px-8 py-4 rounded-xl font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-300 hover:bg-gray-50 transition-all"
               >
-                Join Free
+                Join Free Today
               </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-            Why Shop With Us?
-          </h2>
-          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-            Experience shopping like never before with our premium features
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div
-                className={`inline-flex p-3 rounded-xl bg-gradient-to-r ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
-              >
-                <div className="text-white">
-                  {feature.icon}
+      {/* Stats Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 text-center">
+              <div className="flex justify-center mb-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-gray-50 to-white">
+                  <div className="text-blue-600">{stat.icon}</div>
                 </div>
               </div>
-              
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {feature.title}
-              </h3>
-              
-              <p className="text-gray-600">
-                {feature.description}
-              </p>
+              <div className="text-3xl font-bold text-gray-900">{stat.number}</div>
+              <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl mx-4 md:mx-8 lg:mx-auto max-w-7xl p-8 md:p-12 my-16">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="text-white">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to Get Started?
+      {/* Features Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Why We're Different
+          </h2>
+          <p className="text-gray-600 text-lg">
+            Built on trust, backed by experts
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <div 
+              key={index}
+              className="group relative bg-white rounded-2xl p-8 border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-xl"
+            >
+              <div className={`inline-flex p-4 rounded-xl bg-gradient-to-r ${feature.color} mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="text-white">{feature.icon}</div>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                {feature.title}
+              </h3>
+              
+              <p className="text-gray-600 mb-4">
+                {feature.desc}
+              </p>
+
+              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
+                {feature.highlight}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust Process */}
+      <div className="bg-gradient-to-b from-gray-50 to-white py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              How Trust Works Here
             </h2>
-            <p className="text-purple-100 max-w-2xl">
-              Join thousands of satisfied customers who trust UserProduct for 
-              their shopping needs.
+            <p className="text-gray-600">
+              Three steps to guaranteed satisfaction
             </p>
           </div>
+
+          <div className="relative">
+            {/* Connecting Line */}
+            <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-purple-500 -z-10" />
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  step: "01",
+                  title: "Product Verification",
+                  desc: "Our technical team reviews every item",
+                  checks: ["Quality Checked", "Specs Verified", "Performance Tested"]
+                },
+                {
+                  step: "02",
+                  title: "Seller Vetting",
+                  desc: "Rigorous background and history check",
+                  checks: ["Identity Verified", "Track Record", "Customer Reviews"]
+                },
+                {
+                  step: "03",
+                  title: "Expert Support",
+                  desc: "Guidance through purchase and beyond",
+                  checks: ["Pre-purchase Advice", "Installation Help", "Post-sale Support"]
+                }
+              ].map((step, index) => (
+                <div key={index} className="text-center relative">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white text-2xl font-bold mb-6 mx-auto">
+                    {step.step}
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                    {step.title}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-6">
+                    {step.desc}
+                  </p>
+                  
+                  <div className="space-y-2">
+                    {step.checks.map((check, idx) => (
+                      <div key={idx} className="flex items-center justify-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-emerald-500" />
+                        <span className="text-gray-700">{check}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Future Vision */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="bg-gradient-to-br from-gray-900 to-black rounded-3xl p-12 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-8">
+            <Sparkles className="h-4 w-4 text-amber-300" />
+            <span className="text-sm font-medium text-white">Coming Soon</span>
+          </div>
           
-          <div className="mt-6 md:mt-0">
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-xl text-purple-600 bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              Create Free Account
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+          <h2 className="text-4xl font-bold text-white mb-6">
+            The Future of Smart Commerce
+          </h2>
+          
+          <p className="text-gray-300 text-xl mb-10 max-w-2xl mx-auto">
+            Professional brokers. Service technicians. Complete solutions.
+          </p>
+
+          {/* Upcoming Features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {upcomingFeatures.map((feature, index) => (
+              <div key={index} className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div className="inline-flex p-3 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 mb-4">
+                  <div className="text-amber-300">{feature.icon}</div>
+                </div>
+                <h4 className="text-xl font-semibold text-white mb-2">{feature.name}</h4>
+                <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white">
+                  {feature.status}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Link
+            to="/early-access"
+            className="inline-flex items-center px-8 py-4 rounded-xl font-semibold text-gray-900 bg-white hover:bg-gray-100 transition-all"
+          >
+            Get Early Access
+            <ArrowRight className="ml-3 h-5 w-5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Final CTA */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              Ready to Shop Smarter?
+            </h2>
+            
+            <p className="text-gray-600 text-lg mb-10 max-w-xl mx-auto">
+              Join thousands who trust our platform for verified products and expert guidance.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/register"
+                className="px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-xl transition-all"
+              >
+                Start Free Account
+              </Link>
+              
+              <Link
+                to="/demo"
+                className="px-8 py-4 rounded-xl font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-blue-300"
+              >
+                Book a Demo
+              </Link>
+            </div>
           </div>
         </div>
       </div>

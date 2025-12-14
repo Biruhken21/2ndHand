@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 // Import Components
 import DashboardHeader from '/src/components/DashboardHeader';
 import PostProductForm from '/src/components/PostProductForm';
-import ProductsSection from '/src/components/ProductsSection';
+import ProductsSection from '/src/components/products/ProductSection';
 import DashboardFilters from '/src/components/DashboardFilters';
 
 const UserDashboard = ({ user }) => {
@@ -43,18 +43,13 @@ const UserDashboard = ({ user }) => {
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [sortBy, setSortBy] = useState('newest');
   
- const categories = [
+const categories = [
   { value: 'electronics', label: 'Electronics', icon: '📱', color: 'bg-blue-100 text-blue-600' },
-  { value: 'smartphones', label: 'Smartphones', icon: '📱', color: 'bg-indigo-100 text-indigo-600' },
-  { value: 'gaming', label: 'Gaming', icon: '🎮', color: 'bg-purple-100 text-purple-600' },
-  { value: 'furniture', label: 'Furniture', icon: '🛋️', color: 'bg-amber-100 text-amber-600' },
   { value: 'vehicles', label: 'Vehicles', icon: '🚗', color: 'bg-red-100 text-red-600' },
-  { value: 'home', label: 'Home & Garden', icon: '🏠', color: 'bg-green-100 text-green-600' }, // Changed from 'real-estate'
-  { value: 'fashion', label: 'Fashion', icon: '👗', color: 'bg-pink-100 text-pink-600' },
+  { value: 'furniture', label: 'Furniture', icon: '🛋️', color: 'bg-amber-100 text-amber-600' },
   { value: 'appliances', label: 'Appliances', icon: '🧊', color: 'bg-cyan-100 text-cyan-600' },
+  { value: 'home', label: 'Home & Garden', icon: '🏠', color: 'bg-green-100 text-green-600' },
   { value: 'sports', label: 'Sports', icon: '🚴', color: 'bg-orange-100 text-orange-600' },
-  { value: 'musical', label: 'Musical', icon: '🎸', color: 'bg-yellow-100 text-yellow-600' },
-  { value: 'collectibles', label: 'Collectibles', icon: '🏀', color: 'bg-teal-100 text-teal-600' },
   { value: 'services', label: 'Services', icon: '🛠️', color: 'bg-gray-100 text-gray-600' },
   { value: 'other', label: 'Other', icon: '📦', color: 'bg-gray-100 text-gray-600' }
 ];

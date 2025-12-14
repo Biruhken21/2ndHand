@@ -1,3 +1,47 @@
+/* In your index.css or App.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* GLOBAL IMAGE FIXES */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Force object-contain for all product images */
+.product-image img,
+[class*="product-card"] img,
+[class*="product-image"] img {
+  object-fit: contain !important;
+}
+
+/* Product display images should not crop */
+.product-display img,
+.product-grid img,
+.product-list img {
+  object-fit: contain !important;
+}
+
+/* Lightbox images should show full */
+.lightbox img,
+[class*="lightbox"] img,
+[class*="modal"] img {
+  object-fit: contain !important;
+}
+
+/* Form preview images */
+.image-preview img,
+[class*="preview"] img,
+[class*="upload"] img {
+  object-fit: contain !important;
+}
+
+/* Utility class for images that need to show fully */
+.img-contain {
+  object-fit: contain !important;
+}
+
+.img-cover {
+  object-fit: cover !important;
+}
