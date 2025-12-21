@@ -7,6 +7,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoute');
 const productRoutes = require('./routes/productRoute');
 const adminRoutes = require('./routes/adminRoute');
+const actionRoutes = require('./routes/actionRoute');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/actions', actionRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {

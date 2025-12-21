@@ -22,17 +22,24 @@ const productSchema = new mongoose.Schema({
     enum: ['fixed', 'negotiable'],
     default: 'fixed'
   },
-    category: {
+  category: {
     type: String,
-    enum: ['electronics', 'smartphones', 'gaming', 'furniture', 'vehicles', 'home', 'fashion', 'appliances', 'sports', 'musical', 'collectibles', 'services', 'other'],
-    required: [ true, 'Category is required']
+    enum: [
+      'electronics',
+      'vehicles', 
+      'furniture',
+      'appliances',
+      'home',
+      'sports',
+      'services',
+      'other'
+    ],
+    required: [true, 'Category is required']
   },
   location: {
     type: String,
     required: [true, 'Location is required']
   },
-  
-  
   images: {
     type: [String],
     required: [true, 'At least 1 image is required'],
@@ -78,22 +85,22 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   
-  // Contact inquiries (buyer info to admin)
-  inquiries: [{
-    buyerName: String,
-    buyerEmail: String,
-    buyerPhone: String,
-    message: String,
-    inquiredAt: {
-      type: Date,
-      default: Date.now
-    },
-    status: {
-      type: String,
-      enum: ['new', 'contacted', 'closed'],
-      default: 'new'
-    }
-  }],
+  // REMOVED: inquiries field (now in separate Inquiry model)
+  // inquiries: [{
+  //   buyerName: String,
+  //   buyerEmail: String,
+  //   buyerPhone: String,
+  //   message: String,
+  //   inquiredAt: {
+  //     type: Date,
+  //     default: Date.now
+  //   },
+  //   status: {
+  //     type: String,
+  //     enum: ['new', 'contacted', 'closed'],
+  //     default: 'new'
+  //   }
+  // }],
   
   // Metadata
   views: {
@@ -109,56 +116,10 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware 
-// productSchema.pre('save', function(next) {
-//   try {
-    
-//     if (!this.description || typeof this.description !== 'string') {
-//       return next();
-//     }
-    
-//     // Create a new description to avoid mutation issues
-//     let cleanDescription = this.description;
-    
-//     // Remove phone numbers (10+ digits)
-//     cleanDescription = cleanDescription.replace(/\b\d{10,}\b/g, '[CONTACT REMOVED]');
-    
-//     // Remove email addresses
-//     cleanDescription = cleanDescription.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL REMOVED]');
-    
-//     // Remove specific phone patterns
-//     cleanDescription = cleanDescription.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE REMOVED]');
-    
-//     // Update the description
-//     this.description = cleanDescription;
-    
-//     next();
-//   } catch (error) {
-//     // Log the error and pass it to mongoose
-//     console.error('Error in product pre-save middleware:', error);
-//     next(error);
-//   }
-// });
-
-// Alternative: If you're using async/await in the future
-// productSchema.pre('save', async function() {
-//   if (!this.description || typeof this.description !== 'string') {
-//     return;
-//   }
-//   
-//   let cleanDescription = this.description;
-//   cleanDescription = cleanDescription.replace(/\b\d{10,}\b/g, '[CONTACT REMOVED]');
-//   cleanDescription = cleanDescription.replace(/[\w.-]+@[\w.-]+\.\w+/g, '[EMAIL REMOVED]');
-//   cleanDescription = cleanDescription.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE REMOVED]');
-//   this.description = cleanDescription;
-// });
-
 // Indexes for performance
 productSchema.index({ status: 1, isActive: 1 });
 productSchema.index({ postedBy: 1 });
 productSchema.index({ category: 1 });
 productSchema.index({ createdAt: -1 });
-
-
 
 module.exports = mongoose.model('Product', productSchema);

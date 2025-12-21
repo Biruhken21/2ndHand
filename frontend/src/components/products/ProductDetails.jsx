@@ -2,9 +2,35 @@ import React, { useState } from "react";
 import { X, Eye } from "lucide-react";
 
 const ProductDetails = ({ product, categories, onClose }) => {
+  // Add null check for product
+  if (!product) {
+    return (
+      <div
+        className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+        onClick={onClose}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl"
+        >
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-red-600 mb-2">Product Not Found</h3>
+            <p className="text-gray-600 mb-4">The product data is not available.</p>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [showFull, setShowFull] = useState(false);
   const fullDescription = product.fullDescription || product.description || "";
-  const categoryObj = categories.find(c => c.value === product.category) || {};
+  const categoryObj = categories?.find(c => c.value === product.category) || {};
 
   return (
     <div
@@ -55,11 +81,11 @@ const ProductDetails = ({ product, categories, onClose }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-gray-50 p-3 rounded-lg flex flex-col">
               <span className="text-sm text-gray-500 mb-1">Category</span>
-              <span className="font-medium text-gray-800">{categoryObj.label || product.category}</span>
+              <span className="font-medium text-gray-800">{categoryObj.label || product.category || "Not specified"}</span>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg flex flex-col">
               <span className="text-sm text-gray-500 mb-1">Location</span>
-              <span className="font-medium text-gray-800">{product.location}</span>
+              <span className="font-medium text-gray-800">{product.location || "Not specified"}</span>
             </div>
             <div className="bg-gray-50 p-3 rounded-lg flex flex-col">
               <span className="text-sm text-gray-500 mb-1">Price Type</span>
@@ -81,7 +107,7 @@ const ProductDetails = ({ product, categories, onClose }) => {
                 showFull ? "max-h-full" : "max-h-36 overflow-hidden"
               }`}
             >
-              {fullDescription}
+              {fullDescription || "No description available."}
             </p>
 
             {fullDescription.length > 180 && (

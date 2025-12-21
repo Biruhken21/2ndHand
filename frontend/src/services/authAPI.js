@@ -108,42 +108,81 @@ export const authAPI = {
 
 // Product API
 export const productAPI = {
+  // Create new product
   createProduct: (formData) => {
     return API.post('/products', formData);
   },
+  
   getApprovedProducts: (params) => API.get('/products', { params }),
-  markAsSold: (id) => API.put(`/products/${id}/sold`)
+  getProductById: (id) => API.get(`/products/${id}`),
+  markAsSold: (id) => API.put(`/products/${id}/sold`),
+   getMyProducts: async () => {
+    try {
+      console.log("Calling getMyProducts...");
+      const response = await API.get('/products/user/my-products');
+      console.log("getMyProducts response:", response);
+      console.log("Response structure:", {
+        data: response.data,
+        status: response.status,
+        fullResponse: response
+      });
+      return response;
+    } catch (error) {
+      console.error("getMyProducts error:", error);
+      throw error;
+    }
+  },
+  updateProduct: (id, data) => API.put(`/products/${id}`, data),
+  deleteProduct: (id) => API.delete(`/products/${id}`)
 };
 
-// ==================== ADMIN API ====================
-export const adminAPI = {
-  // Product Management
-  getPendingProducts: (params = {}) => API.get('/admin/products/pending', { params }),
-  approveProduct: (id, action, reason) => 
-    API.put(`/admin/products/${id}/approve`, { action, reason }),
+// Action API - 
+export const actionAPI = {
+  // ========== FAVORITE ACTIONS ==========
+  toggleFavorite: (productId) => API.put(`/actions/favorite/${productId}`),
+  getFavorites: () => API.get('/actions/favorites'),
+  checkFavoriteStatus: (productId) => API.get(`/actions/favorite/${productId}/status`),
   
-  getAllProducts: (params = {}) => API.get('/admin/products', { params }),
+  // ========== SHARE ACTIONS ==========
+  shareProduct: (productId) => API.put(`/actions/share/${productId}`),
   
-  // User Management
-  getAllUsers: (params = {}) => API.get('/admin/users', { params }),
-  
-  // Inquiry Management
-  getAllInquiries: (params = {}) => API.get('/admin/inquiries', { params }),
-  
-  // Helper to check if user is admin (based on token)
-  isAdminUser: () => {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    
+  // ========== CONTACT ACTIONS ==========
+  contactSeller: (productId, data) => {
+  // Check what your backend expects - try both formats
+  return API.post(`/actions/contact/${productId}`, {
+    message: data.message,
+    name: data.name,
+    email: data.email,
+    phone: data.phone
+  });
+},
+    getContactedProducts: async () => {
     try {
-      // Decode JWT token to check role (client-side check only)
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role === 'admin' || payload.user?.role === 'admin';
+      console.log("Calling getContactedProducts...");
+      const response = await API.get('/actions/contact/my-contacts');
+      console.log("getContactedProducts response:", response);
+      console.log("Response structure:", {
+        data: response.data,
+        status: response.status,
+        fullResponse: response
+      });
+      return response;
     } catch (error) {
-      console.error('Error checking admin status:', error);
-      return false;
+      console.error("getContactedProducts error:", error);
+      throw error;
     }
-  }
+  },
+
+  // notifications actions
+  getUserNotifications: () => API.get('/actions/notifications'),
+  markAsRead: (notificationId) => API.put(`/actions/notifications/${notificationId}/mark-as-read`)
+};
+
+// For convenience - single export with all APIs
+export const api = {
+  auth: authAPI,
+  products: productAPI,
+  actions: actionAPI
 };
 
 export default API;

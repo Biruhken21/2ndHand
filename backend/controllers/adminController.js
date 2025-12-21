@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
+ const Inquiry = require('../models/Inquiry');
 const mongoose = require('mongoose');
 
 /**
@@ -315,11 +316,8 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all inquiries
- * @route   GET /api/admin/inquiries
- * @access  Private/Admin
- */
+
+// get all inquiries
 exports.getAllInquiries = async (req, res) => {
   try {
     // Validate query parameters
@@ -327,69 +325,99 @@ exports.getAllInquiries = async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
     const status = req.query.status || 'all';
+    const search = req.query.search || '';
 
-    // Build aggregation pipeline
-    const pipeline = [
-      { $match: { 'inquiries.0': { $exists: true } } },
-      { $unwind: '$inquiries' }
-    ];
+    // Build base query
+    let query = {};
 
     // Filter by status if not 'all'
     if (status !== 'all') {
-      pipeline.push({
-        $match: { 'inquiries.status': status }
-      });
+      query.status = status;
     }
 
-    // Count total
-    const countPipeline = [...pipeline, { $count: 'total' }];
-    
-    // Add pagination and formatting
-    pipeline.push(
-      { $sort: { 'inquiries.inquiredAt': -1 } },
-      { $skip: skip },
-      { $limit: limit },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'postedBy',
-          foreignField: '_id',
-          as: 'postedBy'
-        }
-      },
-      { $unwind: '$postedBy' },
-      {
-        $project: {
-          inquiryId: '$inquiries._id',
-          productId: '$_id',
-          productTitle: '$title',
-          productImage: { $arrayElemAt: ['$images', 0] },
-          brokerName: '$postedBy.name',
-          brokerEmail: '$postedBy.email',
-          buyerName: '$inquiries.buyerName',
-          buyerEmail: '$inquiries.buyerEmail',
-          buyerPhone: '$inquiries.buyerPhone',
-          message: '$inquiries.message',
-          status: '$inquiries.status',
-          inquiredAt: '$inquiries.inquiredAt'
-        }
-      }
-    );
+    // Search functionality
+    if (search) {
+      query.$or = [
+        { buyerName: { $regex: search, $options: 'i' } },
+        { buyerEmail: { $regex: search, $options: 'i' } },
+        { buyerPhone: { $regex: search, $options: 'i' } },
+        { message: { $regex: search, $options: 'i' } }
+      ];
+    }
 
-    // Execute queries
-    const [inquiries, countResult] = await Promise.all([
-      Product.aggregate(pipeline),
-      Product.aggregate(countPipeline)
-    ]);
+    // Get total count
+    const total = await Inquiry.countDocuments(query);
 
-    const total = countResult[0]?.total || 0;
+    // Fetch inquiries with populated data - UPDATED TO INCLUDE LOCATION & CATEGORY
+    const inquiries = await Inquiry.find(query)
+      .populate({
+        path: 'productId',
+        select: 'title price images location category postedBy', // ADDED location and category
+        populate: {
+          path: 'postedBy',
+          select: 'name email phone'
+        }
+      })
+      .populate({
+        path: 'buyerId',
+        select: 'name email phone'
+      })
+      .populate({
+        path: 'sellerId',
+        select: 'name email phone'
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    // Format the response - UPDATED TO INCLUDE LOCATION & CATEGORY
+    const formattedInquiries = inquiries.map(inquiry => ({
+      inquiryId: inquiry._id,
+      _id: inquiry._id, // Keep both for compatibility
+      
+      productId: inquiry.productId?._id,
+      productTitle: inquiry.productId?.title || 'Product Not Found',
+      productPrice: inquiry.productId?.price,
+      productImage: inquiry.productId?.images?.[0],
+      productLocation: inquiry.productId?.location, // ADDED
+      productCategory: inquiry.productId?.category, // ADDED
+      
+      // Buyer info (from inquiry fields)
+      buyerName: inquiry.buyerName,
+      buyerEmail: inquiry.buyerEmail,
+      buyerPhone: inquiry.buyerPhone,
+      buyerId: inquiry.buyerId?._id,
+      
+      // Seller/Broker info (from populated product owner)
+      brokerName: inquiry.productId?.postedBy?.name || inquiry.sellerId?.name,
+      brokerEmail: inquiry.productId?.postedBy?.email || inquiry.sellerId?.email,
+      brokerPhone: inquiry.productId?.postedBy?.phone || inquiry.sellerId?.phone,
+      
+      // Seller reference
+      sellerId: inquiry.sellerId?._id,
+      sellerName: inquiry.sellerId?.name,
+      sellerEmail: inquiry.sellerId?.email,
+      sellerPhone: inquiry.sellerId?.phone,
+      
+      // Message and status
+      message: inquiry.message,
+      status: inquiry.status,
+      inquiredAt: inquiry.createdAt,
+      createdAt: inquiry.createdAt,
+      updatedAt: inquiry.updatedAt,
+      
+      // Additional populated references (optional)
+      buyerInfo: inquiry.buyerId, // Full buyer object if needed
+      sellerInfo: inquiry.sellerId, // Full seller object if needed
+      productInfo: inquiry.productId // Full product object if needed
+    }));
 
     // Get status counts
-    const statusCounts = await Product.aggregate([
-      { $unwind: '$inquiries' },
+    const statusCounts = await Inquiry.aggregate([
       {
         $group: {
-          _id: '$inquiries.status',
+          _id: '$status',
           count: { $sum: 1 }
         }
       }
@@ -397,14 +425,14 @@ exports.getAllInquiries = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      count: inquiries.length,
+      count: formattedInquiries.length,
       total,
       pages: Math.ceil(total / limit),
       currentPage: page,
       limit,
       status,
       statusCounts,
-      inquiries
+      inquiries: formattedInquiries
     });
 
   } catch (error) {
