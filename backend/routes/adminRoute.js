@@ -2,12 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const { admin } = require('../middleware/role');
+const { uploadProductImages} = require('../middleware/upload');
 const {
   getPendingProducts,
   approveProduct,
   getAllProducts,
   getAllUsers,
-  getAllInquiries
+  getAllInquiries,
+  createProduct
 } = require('../controllers/adminController');
 
 // =================== PRODUCT MANAGEMENT ===================
@@ -17,15 +19,13 @@ router.get('/products/pending', protect, admin, getPendingProducts);
 // Approve or reject pending product (admin only)
 router.put('/products/:id/approve', protect, admin, approveProduct);
 
-// Get all products (admin view with filters)
+// Get all products 
 router.get('/products', protect, admin, getAllProducts);
-
-// =================== USER MANAGEMENT ===================
-// Get all users (admin only)
+// get all users
 router.get('/users', protect, admin, getAllUsers);
-
-// =================== INQUIRY MANAGEMENT ===================
-// Get all inquiries (admin only)
+//get users inquiries
 router.get('/inquiries', protect, admin, getAllInquiries);
+// create new product
+router.post('/products', protect, admin, uploadProductImages, createProduct)
 
 module.exports = router;

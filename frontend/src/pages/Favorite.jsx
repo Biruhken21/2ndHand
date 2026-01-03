@@ -1,7 +1,7 @@
 // pages/Favorites.jsx
 import React, { useState, useEffect } from 'react';
 import { actionAPI } from '../services/authAPI.js';
-import { Heart, DollarSign } from 'lucide-react';
+import { Heart, DollarSign, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Favorites = () => {
@@ -39,6 +39,7 @@ const Favorites = () => {
     }
   };
 
+  /* ---------------- LOADING ---------------- */
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -50,34 +51,76 @@ const Favorites = () => {
     );
   }
 
+  /* ---------------- EMPTY ---------------- */
   if (favorites.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-gray-400" />
+      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+        <div className="max-w-6xl mx-auto">
+
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="inline-flex items-center gap-2 px-4 py-2
+                         text-sm font-medium text-gray-600
+                         bg-white border border-gray-200 rounded-lg
+                         hover:bg-gray-50 hover:text-gray-800 transition"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </button>
           </div>
-          <h3 className="text-gray-600 font-medium text-base mb-1">No favorites yet</h3>
-          <p className="text-gray-400 text-sm">Products you like will appear here</p>
+
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center max-w-sm">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-gray-600 font-medium text-base mb-1">
+                No favorites yet
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Products you like will appear here
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
     );
   }
 
+  /* ---------------- MAIN ---------------- */
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
+
+        {/* Back Button */}
+        <div className="mb-6">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center gap-2 px-4 py-2
+                       text-sm font-medium text-gray-600
+                       bg-white border border-gray-200 rounded-lg
+                       hover:bg-gray-50 hover:text-gray-800 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </button>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center gap-3 px-6 py-3 bg-white rounded-full border border-gray-200 shadow-sm">
             <Heart className="w-5 h-5 text-pink-500" />
             <span className="text-base font-medium text-gray-700">
-              My Favorites <span className="text-pink-500">({favorites.length})</span>
+              My Favorites{' '}
+              <span className="text-pink-500">({favorites.length})</span>
             </span>
           </div>
         </div>
 
-        {/* Favorites Grid - 3 per row */}
+        {/* Favorites Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {favorites.map((favorite, index) => {
             const product = favorite.product || favorite;
@@ -86,47 +129,48 @@ const Favorites = () => {
             return (
               <div
                 key={productId}
-                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-gray-200
+                           overflow-hidden hover:shadow-md transition-shadow"
               >
-                {/* Image Section */}
-                <div 
+                {/* Image */}
+                <div
                   className="relative h-56 overflow-hidden cursor-pointer group"
                   onClick={() => navigate(`/product/${productId}`)}
                 >
                   <img
                     src={product.images?.[0] || product.image || "/placeholder.png"}
                     alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover
+                               group-hover:scale-105 transition-transform duration-300"
                   />
-                  
-                  {/* Overlay gradient */}
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
-                  
-                  {/* Remove Favorite Button */}
+
+                  {/* Remove Favorite */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveFavorite(productId);
                     }}
-                    className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-colors"
-                    title="Remove from favorites"
+                    className="absolute top-3 right-3 p-2
+                               bg-white/90 hover:bg-white
+                               rounded-full shadow-md transition"
                   >
                     <Heart className="w-4 h-4 fill-pink-500 text-pink-500" />
                   </button>
                 </div>
 
-                {/* Product Info */}
+                {/* Info */}
                 <div className="p-4">
-                  {/* Title */}
-                  <h3 
-                    className="font-medium text-gray-800 truncate cursor-pointer hover:text-purple-600 mb-2"
+                  <h3
+                    className="font-medium text-gray-800 truncate
+                               cursor-pointer hover:text-purple-600 mb-2"
                     onClick={() => navigate(`/product/${productId}`)}
                     title={product.title}
                   >
                     {product.title}
                   </h3>
 
-                  {/* Price and Status */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <DollarSign className="w-4 h-4 text-purple-600" />
@@ -134,28 +178,32 @@ const Favorites = () => {
                         {product.price}
                       </span>
                     </div>
-                    
-                    {/* Status */}
+
                     {product.status && (
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        product.status === 'sold' 
-                          ? 'bg-gray-100 text-gray-600' 
-                          : 'bg-green-100 text-green-600'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          product.status === 'sold'
+                            ? 'bg-gray-100 text-gray-600'
+                            : 'bg-green-100 text-green-600'
+                        }`}
+                      >
                         {product.status === 'sold' ? 'Sold' : 'Active'}
                       </span>
                     )}
                   </div>
 
-                  {/* Quick Info (optional) */}
                   {(product.category || product.location) && (
                     <div className="mt-3 pt-3 border-t border-gray-100">
                       <div className="flex items-center text-xs text-gray-500">
                         {product.category && (
-                          <span className="truncate mr-3">{product.category}</span>
+                          <span className="truncate mr-3">
+                            {product.category}
+                          </span>
                         )}
                         {product.location && (
-                          <span className="truncate">{product.location}</span>
+                          <span className="truncate">
+                            {product.location}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -165,6 +213,7 @@ const Favorites = () => {
             );
           })}
         </div>
+
       </div>
     </div>
   );

@@ -2,15 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  MapPin, 
-  Calendar, 
-  Eye,
+  MapPin,
   MessageCircle,
   AlertCircle,
   Loader2,
   ChevronLeft,
   ChevronRight,
-  Shield,
   Check
 } from 'lucide-react';
 import { productAPI } from '/src/services/authAPI';
@@ -24,7 +21,6 @@ const ProductPage = () => {
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isContactLoading, setIsContactLoading] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Fetch product data
   useEffect(() => {
@@ -69,51 +65,36 @@ const ProductPage = () => {
   const prevImage = () => {
     if (!product?.images?.length) return;
     setCurrentImageIndex(prev => prev === 0 ? product.images.length - 1 : prev - 1);
-    setImageLoaded(false);
   };
 
   const nextImage = () => {
     if (!product?.images?.length) return;
     setCurrentImageIndex(prev => prev === product.images.length - 1 ? 0 : prev + 1);
-    setImageLoaded(false);
   };
 
   // Loading State
   if (loading) {
     return (
-      <>
-        <Helmet>
-          <title>{"Loading Product..."}</title>
-          <meta name="description" content={"Product details are loading..."} />
-        </Helmet>
-        <div className="min-h-screen pt-20 flex items-center justify-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto" />
-          <p className="mt-4 text-gray-600">Loading product...</p>
-        </div>
-      </>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
     );
   }
 
   // Error State
   if (error || !product) {
     return (
-      <>
-        <Helmet>
-          <title>{"Product Not Found"}</title>
-          <meta name="description" content={"This product is not available."} />
-        </Helmet>
-        <div className="min-h-screen pt-20 flex items-center justify-center p-4">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
-          <p className="text-gray-600 mb-6">{error || 'Product no longer available'}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
-          >
-            Browse Products
-          </button>
-        </div>
-      </>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+        <p className="text-gray-600 mb-6">{error || 'Product no longer available'}</p>
+        <button
+          onClick={() => navigate('/')}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Browse Products
+        </button>
+      </div>
     );
   }
 
@@ -122,310 +103,143 @@ const ProductPage = () => {
   const priceType = product.priceType || 'Fixed';
   const description = product.description || 'No description available.';
   const isSold = product.status === 'sold';
-  const mainImage = images[0] || '';
 
   return (
     <>
-      {/* Meta Tags for Social Media Sharing */}
       <Helmet>
-        {/* Basic Meta */}
         <title>{`${product.title} - $${product.price}`}</title>
         <meta name="description" content={`${description.substring(0, 160)}`} />
-        
-        {/* Open Graph / Facebook */}
-        <meta property="og:type" content="product" />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:title" content={`${product.title} - $${product.price}`} />
-        <meta property="og:description" content={`${description.substring(0, 160)}`} />
-        {mainImage && <meta property="og:image" content={mainImage} />}
-        {mainImage && <meta property="og:image:width" content="1200" />}
-        {mainImage && <meta property="og:image:height" content="630" />}
-        <meta property="product:price:amount" content={product.price} />
-        <meta property="product:price:currency" content="USD" />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${product.title} - $${product.price}`} />
-        <meta name="twitter:description" content={`${description.substring(0, 160)}`} />
-        {mainImage && <meta name="twitter:image" content={mainImage} />}
       </Helmet>
 
-      {/* Page Content - Centered Design */}
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        {/* Header - Centered */}
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
         <div className="bg-white shadow-sm border-b">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
+          <div className="max-w-6xl mx-auto px-4 py-3">
+            <div className="flex justify-between items-center">
               <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition group"
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
               >
-                <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                <span className="font-medium">Back to Products</span>
+                <ArrowLeft className="w-5 h-5" />
+                <span>Back</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Main Content - Centered Container */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Product Card - Centered with beautiful design */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 transition-all duration-300 hover:shadow-2xl">
+        {/* Main Content */}
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="md:flex">
-              {/* Left: Images Gallery - Centered */}
-              <div className="md:w-1/2 p-6 md:p-8">
-                <div className="relative h-[400px] md:h-[500px] rounded-xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+              {/* Images */}
+              <div className="md:w-1/2 p-4">
+                <div className="relative h-80 md:h-96 rounded-lg overflow-hidden bg-gray-100">
                   {images.length > 0 ? (
                     <>
-                      {!imageLoaded && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
-                        </div>
-                      )}
-                      
                       <img
                         src={images[currentImageIndex]}
                         alt={product.title}
-                        className="w-full h-full object-contain transition-opacity duration-300"
-                        onLoad={() => setImageLoaded(true)}
-                        style={{ opacity: imageLoaded ? 1 : 0 }}
+                        className="w-full h-full object-contain"
                       />
                       
                       {isSold && (
-                        <div className="absolute top-6 left-6 bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-xl transform -rotate-3">
-                          <span className="flex items-center gap-2">
-                            <Check className="w-4 h-4" />
-                            SOLD
-                          </span>
+                        <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1.5 rounded font-bold">
+                          SOLD
                         </div>
                       )}
                       
-                      {/* Image Navigation */}
                       {images.length > 1 && (
                         <>
                           <button
                             onClick={prevImage}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-2xl flex items-center justify-center hover:scale-110 transition-all hover:bg-white"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center"
                           >
-                            <ChevronLeft className="w-6 h-6 text-gray-800" />
+                            <ChevronLeft className="w-4 h-4" />
                           </button>
                           <button
                             onClick={nextImage}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm shadow-2xl flex items-center justify-center hover:scale-110 transition-all hover:bg-white"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center"
                           >
-                            <ChevronRight className="w-6 h-6 text-gray-800" />
+                            <ChevronRight className="w-4 h-4" />
                           </button>
                           
                           {/* Image Counter */}
-                          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white px-4 py-1.5 rounded-full text-sm font-medium shadow-lg">
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-2 py-1 rounded text-xs">
                             {currentImageIndex + 1} / {images.length}
                           </div>
                         </>
                       )}
                     </>
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                      <div className="text-6xl mb-4">📷</div>
-                      <p className="text-lg">No image available</p>
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      No image
                     </div>
                   )}
                 </div>
-                
-                {/* Thumbnails - Centered */}
-                {images.length > 1 && (
-                  <div className="flex justify-center gap-3 mt-6 py-2">
-                    {images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setCurrentImageIndex(idx);
-                          setImageLoaded(false);
-                        }}
-                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                          idx === currentImageIndex 
-                            ? 'border-blue-500 scale-105 shadow-lg' 
-                            : 'border-gray-200 hover:border-gray-300 hover:scale-102'
-                        }`}
-                      >
-                        <img 
-                          src={img} 
-                          alt={`Thumbnail ${idx + 1}`} 
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
-              {/* Right: Product Details - Beautiful Design */}
-              <div className="md:w-1/2 p-6 md:p-8 border-t md:border-t-0 md:border-l border-gray-100">
-                {/* Title and Price - Centered Header */}
-                <div className="text-center md:text-left mb-8">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 rounded-full mb-4">
-                    <span className="text-sm font-medium text-blue-700">{product.category || "General"}</span>
-                  </div>
-                  
-                  <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                    {product.title}
-                  </h1>
-                  
-                  <div className="flex flex-col md:flex-row md:items-center gap-4 justify-center md:justify-start">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        ${product.price}
-                      </span>
-                      <span className={`px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm ${
-                        priceType === 'Negotiable' 
-                          ? 'bg-gradient-to-r from-orange-100 to-amber-100 text-amber-700 border border-amber-200' 
-                          : 'bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200'
-                      }`}>
-                        {priceType}
-                      </span>
-                    </div>
-                  </div>
+              {/* Details */}
+              <div className="md:w-1/2 p-4 md:p-6">
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.title}</h1>
+                
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-3xl font-bold text-blue-600">
+                    ${product.price}
+                  </span>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    priceType === 'Negotiable' 
+                      ? 'bg-orange-100 text-orange-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {priceType}
+                  </span>
                 </div>
 
-                {/* Stats - Beautiful Cards */}
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {product.views && (
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Eye className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Views</p>
-                          <p className="text-lg font-bold text-gray-900">{product.views}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {product.createdAt && (
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-100 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                          <Calendar className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Posted</p>
-                          <p className="text-lg font-bold text-gray-900">
-                            {new Date(product.createdAt).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric',
-                              year: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Location Card */}
+                {/* Location */}
                 {product.location && (
-                  <div className="mb-8 p-5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-white rounded-xl shadow-sm">
-                        <MapPin className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-blue-800 mb-1">📍 Location</p>
-                        <p className="text-gray-800 font-medium">{product.location}</p>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 text-gray-600 mb-4">
+                    <MapPin className="w-4 h-4" />
+                    <span>{product.location}</span>
                   </div>
                 )}
 
-                {/* Description - Beautiful Card */}
-                <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1.5 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                    <h3 className="text-xl font-bold text-gray-900">Description</h3>
-                  </div>
-                  <div className="bg-gradient-to-b from-white to-gray-50 p-6 rounded-xl border border-gray-100 shadow-sm">
-                    <p className="text-gray-700 whitespace-pre-line leading-relaxed text-base">
-                      {description}
-                    </p>
-                  </div>
+                {/* Description */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
+                  <p className="text-gray-700 whitespace-pre-line">
+                    {description}
+                  </p>
                 </div>
 
-                {/* Contact Button - Centered & Beautiful */}
-                <div className="mb-8">
-                  <button
-                    onClick={handleContact}
-                    disabled={isContactLoading || isSold}
-                    className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:-translate-y-1 ${
-                      isSold
-                        ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl'
-                    }`}
-                  >
-                    {isContactLoading ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>Redirecting...</span>
-                      </div>
-                    ) : isSold ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Check className="w-5 h-5" />
-                        Product Sold
-                      </span>
-                    ) : (
-                      <span className="flex items-center justify-center gap-3">
-                        <MessageCircle className="w-5 h-5" />
-                        Register to Contact Seller
-                      </span>
-                    )}
-                  </button>
-                  
-                  {!isSold && (
-                    <p className="text-center text-gray-600 mt-3 text-sm">
-                      Create an account to contact the seller securely
-                    </p>
+                {/* Contact Button */}
+                <button
+                  onClick={handleContact}
+                  disabled={isContactLoading || isSold}
+                  className={`w-full py-3 rounded-lg font-medium transition ${
+                    isSold
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white'
+                  }`}
+                >
+                  {isContactLoading ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Redirecting...</span>
+                    </div>
+                  ) : isSold ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Product Sold
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2">
+                      <MessageCircle className="w-4 h-4" />
+                      Register to Contact Seller
+                    </div>
                   )}
-                </div>
-
-                {/* Safety Tips - Beautiful Design */}
-                <div className="p-5 rounded-xl bg-gradient-to-r from-yellow-50 to-amber-50 border border-amber-100">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-amber-100 rounded-lg">
-                      <Shield className="w-6 h-6 text-amber-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-amber-800 mb-2 flex items-center gap-2">
-                        🔒 Safety First
-                      </h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-amber-700">Always meet in public places</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-amber-700">Inspect products before payment</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-amber-700">Avoid advance payments</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Simple Call to Action - Clean & Centered */}
-          <div className="text-center">
-            <button
-              onClick={() => navigate('/')}
-              className="px-8 py-3 bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl font-semibold hover:from-gray-900 hover:to-black transition-all duration-300 shadow-lg"
-            >
-              ← Browse More Products
-            </button>
           </div>
         </div>
       </div>

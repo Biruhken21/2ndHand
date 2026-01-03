@@ -6,6 +6,7 @@
 /* GLOBAL IMAGE FIXES */
 img {
   max-width: 100%;
+  display: block;
   height: auto;
 }
 
@@ -13,7 +14,21 @@ img {
 .product-image img,
 [class*="product-card"] img,
 [class*="product-image"] img {
+  /* Fit the image into the positioned image container.
+     Use full width/height with object-fit:contain so the
+     image never overflows the card and preserves aspect ratio. */
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  margin: auto !important;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  display: block !important;
 }
 
 /* Product display images should not crop */
@@ -40,6 +55,11 @@ img {
 /* Utility class for images that need to show fully */
 .img-contain {
   object-fit: contain !important;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .img-cover {

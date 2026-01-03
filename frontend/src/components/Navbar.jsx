@@ -4,12 +4,14 @@ import { useAuth } from '/src/context/AuthContext';
 import { actionAPI } from '/src/services/authAPI.js';
 import Notifications from '/src/pages/Notification';
 import {
-  ShoppingCart,
   Bell,
   Home,
   Menu,
   X,
-  Heart
+  Heart,
+  User,
+  LogOut,
+  Package
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -42,7 +44,12 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    setIsMenuOpen(false);
     navigate('/');
+  };
+
+  const closeMobileMenu = () => {
+    setIsMenuOpen(false);
   };
 
   return (
@@ -61,28 +68,25 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* CENTER HOME */}
+            {/* CENTER */}
             <div className="hidden md:flex">
               <Link
                 to="/"
                 className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100"
               >
-                <Home />
+                Products
               </Link>
             </div>
 
-            {/* RIGHT SIDE */}
+            {/* RIGHT */}
             <div className="flex items-center gap-6">
 
               {isAuthenticated && (
                 <>
-                  {/* ICON GROUP */}
                   <div className="flex items-center gap-3">
-
-                    {/* FAVORITES */}
                     <Link
                       to="/favorites"
-                      className="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                      className="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200"
                     >
                       <Heart className="w-5 h-5 text-gray-700" />
                       {favoritesCount > 0 && (
@@ -92,10 +96,9 @@ const Navbar = () => {
                       )}
                     </Link>
 
-                    {/* NOTIFICATIONS */}
                     <button
                       onClick={() => setShowNotifications(true)}
-                      className="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
+                      className="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200"
                     >
                       <Bell className="w-5 h-5 text-gray-700" />
                       {notificationsCount > 0 && (
@@ -104,37 +107,15 @@ const Navbar = () => {
                         </span>
                       )}
                     </button>
-
                   </div>
 
                   {/* PROFILE */}
-                  <div className="relative group ml-2">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold cursor-pointer">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-
-                    {/* DROPDOWN */}
-                    <div className="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg border opacity-0 group-hover:opacity-100 transition">
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 hover:bg-gray-50"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/favorites"
-                        className="block px-4 py-2 hover:bg-gray-50"
-                      >
-                        Favorites
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
+                  <Link
+                    to="/profile"
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold ml-2"
+                  >
+                    {userName.charAt(0).toUpperCase()}
+                  </Link>
                 </>
               )}
 
@@ -152,20 +133,77 @@ const Navbar = () => {
                 </>
               )}
 
-              {/* MOBILE */}
+              {/* MOBILE BUTTON */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="md:hidden p-2 rounded-lg hover:bg-gray-100"
               >
                 {isMenuOpen ? <X /> : <Menu />}
               </button>
-
             </div>
           </div>
         </div>
       </nav>
 
-      {/* NOTIFICATIONS MODAL */}
+      {/* MOBILE POPUP MENU */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-white border-b shadow-sm">
+          <div className="px-6 py-4 space-y-3">
+
+            <Link
+              to="/dashboard"
+              onClick={closeMobileMenu}
+              className="flex items-center gap-3 text-gray-700"
+            >
+              <Package className="w-5 h-5 text-gray-500" />
+              Explore Products
+            </Link>
+
+            {isAuthenticated && (
+              <>
+                <Link
+                  to="/favorites"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 text-gray-700"
+                >
+                  <Heart className="w-5 h-5 text-pink-500" />
+                  My Favorites
+                </Link>
+
+                <button
+                  onClick={() => {
+                    closeMobileMenu();
+                    setShowNotifications(true);
+                  }}
+                  className="flex items-center gap-3 text-gray-700 w-full"
+                >
+                  <Bell className="w-5 h-5 text-yellow-500" />
+                  Notifications
+                </button>
+
+                <Link
+                  to="/profile"
+                  onClick={closeMobileMenu}
+                  className="flex items-center gap-3 text-gray-700"
+                >
+                  <User className="w-5 h-5 text-gray-500" />
+                   My Profile
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 text-red-600 w-full"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* NOTIFICATIONS */}
       {showNotifications && (
         <Notifications onClose={() => setShowNotifications(false)} />
       )}

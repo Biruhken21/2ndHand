@@ -25,7 +25,6 @@ const ProductCard = ({ product, categories }) => {
   const images = product.images || [];
   const priceType = product.priceType || (product.negotiable ? "negotiable" : "fixed");
 
-  // Check favorite status
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       try {
@@ -41,9 +40,8 @@ const ProductCard = ({ product, categories }) => {
     }
   }, [product._id, product.id]);
 
-  // Favorite function - WORKS CORRECTLY
   const handleFavorite = async (e) => {
-    e.stopPropagation(); // This prevents the card click
+    e.stopPropagation();
     if (isFavoriteLoading) return;
     
     setIsFavoriteLoading(true);
@@ -60,24 +58,19 @@ const ProductCard = ({ product, categories }) => {
     }
   };
 
-  // Share function - WORKS CORRECTLY
   const handleShareClick = (e) => {
-    e.stopPropagation(); // This prevents the card click
+    e.stopPropagation();
     setShowSharePopup(true);
   };
 
-  // Contact function - SHOULD WORK LIKE ABOVE
   const handleContact = (e) => {
-    e.stopPropagation(); // This prevents the card click
+    e.stopPropagation();
     setShowContactPopup(true);
   };
 
-  // Product details function - called when clicking the card
   const handleCardClick = (e) => {
-    // Only open details if not clicking any button
     const isButtonClick = e.target.closest('button') || 
-                          e.target.tagName === 'BUTTON' ||
-                          e.target.closest('button') !== null;
+                          e.target.tagName === 'BUTTON';
     
     if (!isButtonClick) {
       setOpenDetails(true);
@@ -98,24 +91,70 @@ const ProductCard = ({ product, categories }) => {
     <>
       {/* PRODUCT CARD */}
       <div
-        onClick={handleCardClick} // Now it checks if button was clicked
-        className="group bg-white rounded-xl border border-gray-200 hover:border-blue-500 focus-within:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full"
+        onClick={handleCardClick}
+        className="product-card group bg-white rounded-xl border border-gray-200 hover:border-blue-500 focus-within:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full"
       >
-        {/* IMAGE */}
-        <div className="relative w-full aspect-[4/3] bg-gray-100 overflow-hidden rounded-t-xl">
+        {/* IMAGE CONTAINER - FIXED with inline styles */}
+        <div 
+          className="product-image relative bg-gray-100 overflow-hidden rounded-t-xl"
+          style={{
+            width: '100%',
+            height: '0',
+            paddingBottom: '75%', // This creates the 4:3 aspect ratio
+            position: 'relative'
+          }}
+        >
           {!imageLoaded && (
             <div className="absolute inset-0 animate-pulse bg-gray-200" />
           )}
 
           {images.length > 0 ? (
-            <img
-              src={images[currentImageIndex]}
-              alt={product.title}
-              onLoad={() => setImageLoaded(true)}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+            <div 
+              className="absolute inset-0 flex items-center justify-center bg-gray-50"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <img
+                src={images[currentImageIndex]}
+                alt={product.title}
+                onLoad={() => setImageLoaded(true)}
+                className="img-contain"
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain', // INLINE STYLE - CANNOT BE OVERRIDDEN
+                  objectPosition: 'center',
+                  transition: 'transform 0.3s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              />
+            </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <div 
+              className="absolute inset-0 flex items-center justify-center"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)'
+              }}
+            >
               <span className="text-gray-400 text-sm">No Image</span>
             </div>
           )}
@@ -125,12 +164,14 @@ const ProductCard = ({ product, categories }) => {
               <button
                 onClick={prevImage}
                 className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-white shadow-sm"
+                style={{ zIndex: 10 }}
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={nextImage}
                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-white shadow-sm"
+                style={{ zIndex: 10 }}
               >
                 <ChevronRight size={18} />
               </button>
@@ -207,7 +248,7 @@ const ProductCard = ({ product, categories }) => {
               </button>
             </div>
 
-            {/* CONTACT BUTTON - Works EXACTLY like favorite/share */}
+            {/* CONTACT BUTTON */}
             <button
               onClick={handleContact}
               className="flex items-center gap-2 text-xs font-semibold text-white px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5 active:translate-y-0"
@@ -220,7 +261,7 @@ const ProductCard = ({ product, categories }) => {
         </div>
       </div>
 
-      {/* SHARE POPUP */}
+      {/* POPUPS */}
       {showSharePopup && (
         <SharePopup
           product={product}
@@ -228,7 +269,6 @@ const ProductCard = ({ product, categories }) => {
         />
       )}
 
-      {/* PRODUCT DETAILS MODAL */}
       {openDetails && (
         <ProductDetails
           product={product}
@@ -237,7 +277,6 @@ const ProductCard = ({ product, categories }) => {
         />
       )}
 
-      {/* CONTACT POPUP */}
       {showContactPopup && (
         <ContactPopup
           product={product}

@@ -1,13 +1,26 @@
 import React, { useState } from "react";
 import { X, AlertCircle, Check, Loader2, Upload } from "lucide-react";
-import { productAPI } from "/src/services/authAPI";
+import { adminAPI } from "/src/services/adminAPI";
+import { Link } from "react-router-dom";
 
-const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
+const PostProduct = ({ setShowPostForm, onProductPosted }) => {
+  // Define categories enum
+  const categoryOptions = [
+    { value: "electronics", label: "Electronics" },
+    { value: "vehicles", label: "Vehicles" },
+    { value: "furniture", label: "Furniture" },
+    { value: "appliances", label: "Appliances" },
+    { value: "home", label: "Home" },
+    { value: "sports", label: "Sports" },
+    { value: "services", label: "Services" },
+    { value: "other", label: "Other" },
+  ];
+
   const [formData, setFormData] = useState({
     title: "",
     price: "",
     priceType: "fixed",
-    category: categories?.[0]?.value || "",
+    category: categoryOptions[0].value,
     location: "",
     description: "",
   });
@@ -26,8 +39,9 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
   };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (images.length + files.length > 3) return setPostError("Maximum 3 images allowed.");
+    const files = Array.from(e.target.files || []);
+    if (images.length + files.length > 3)
+      return setPostError("Maximum 3 images allowed.");
 
     const validFiles = files.filter((file) => {
       const allowed = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -63,6 +77,7 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
     if (!formData.title.trim() || !formData.price || !formData.location) {
       return setPostError("Please fill all required fields.");
     }
+    if (!formData.category) return setPostError("Please select a category.");
     if (images.length === 0) return setPostError("Upload at least one image.");
 
     const fd = new FormData();
@@ -72,7 +87,7 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
 
     setLoading(true);
     try {
-      const res = await productAPI.createProduct(fd);
+      const res = await adminAPI.createProduct(fd);
       if (res.success) {
         setPostSuccess("Product posted successfully! Awaiting admin approval.");
         setTimeout(() => {
@@ -80,7 +95,7 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
             title: "",
             price: "",
             priceType: "fixed",
-            category: categories[0]?.value || "",
+            category: categoryOptions[0].value,
             location: "",
             description: "",
           });
@@ -105,8 +120,12 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
         {/* HEADER */}
         <div className="bg-gray-50 p-6 flex justify-between items-center border-b border-gray-100">
           <div>
+            <Link to="/admin/dashboard" className="font-semibold text-1xl flex">
+                        Back</Link>
             <h2 className="text-2xl font-semibold text-gray-900">Post a New Product</h2>
-            <p className="text-gray-500 text-sm mt-1">Please describe your product in detail in the description section!</p>
+            <p className="text-gray-500 text-sm mt-1">
+              Please describe your product in detail in the description section!
+            </p>
           </div>
           <button
             className="text-gray-400 hover:text-gray-600 transition"
@@ -138,7 +157,6 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
 
           {/* FORM */}
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Title */}
@@ -197,8 +215,10 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
                   onChange={handleChange}
                   className="w-full mt-2 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition bg-white"
                 >
-                  {categories.map((c) => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
+                  {categoryOptions.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -226,7 +246,9 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
                   placeholder="Write detailed product info..."
                   className="w-full mt-2 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition bg-white placeholder-gray-400 resize-none h-40"
                 />
-                <p className="text-right text-xs text-gray-400 mt-1">{formData.description.length}/2000</p>
+                <p className="text-right text-xs text-gray-400 mt-1">
+                  {formData.description.length}/2000
+                </p>
               </div>
 
               {/* Images */}
@@ -253,7 +275,10 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     {previews.map((src, i) => (
                       <div key={i} className="relative group rounded-xl overflow-hidden shadow-sm">
-                        <img src={src} className="w-full h-32 object-cover transition-transform group-hover:scale-105" />
+                        <img
+                          src={src}
+                          className="w-full h-32 object-cover transition-transform group-hover:scale-105"
+                        />
                         <button
                           type="button"
                           onClick={() => removeImage(i)}
@@ -266,7 +291,6 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
                   </div>
                 )}
               </div>
-
             </div>
 
             {/* Submit Button */}
@@ -276,11 +300,18 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
                 ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}
               `}
             >
-              {loading ? <span className="flex items-center justify-center gap-2"><Loader2 className="animate-spin w-5 h-5" /> Submitting...</span> : "Post Product"}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="animate-spin w-5 h-5" /> Submitting...
+                </span>
+              ) : (
+                "Post Product"
+              )}
             </button>
 
-            <p className="text-center text-xs text-gray-400">⏳ Products are reviewed within 24 hours</p>
-
+            <p className="text-center text-xs text-gray-400">
+              ⏳ Products are reviewed within 24 hours
+            </p>
           </form>
         </div>
       </div>
@@ -288,4 +319,4 @@ const PostProductForm = ({ categories, setShowPostForm, onProductPosted }) => {
   );
 };
 
-export default PostProductForm;
+export default PostProduct;

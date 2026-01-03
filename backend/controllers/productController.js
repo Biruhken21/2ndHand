@@ -9,35 +9,45 @@ const { cloudinary } = require('../config/cloudinary');
 // @access  Private (any authenticated user)
 exports.createProduct = async (req, res) => {
   try {
-    // Check if user is authenticated (any user can post)
+    // Check if user is authenticated
     if (!req.user) {
       return res.status(401).json({
         success: false,
         message: 'Please login to post products'
       });
     }
+
+    // Determine product status based on role
+    let status = 'pending';
+    let approvalMessage = 'Your product is under review. It will be approved within 24 hours.';
     
+    if (req.user.role === 'admin') {
+      status = 'approved';
+      approvalMessage = 'Product approved automatically as admin.';
+    }
+
     // Get image URLs from Cloudinary
-    // Note: Files are already uploaded by uploadProductImages middleware
     const images = req.files.map(file => file.path);
-    
+
     // Create product
     const product = await Product.create({
       ...req.body,
       images: images,
-      postedBy: req.user.id, // REQUIRED field
-      status: 'pending',
-      approvalMessage: 'Your product is under review. It will be approved within 24 hours.'
+      postedBy: req.user.id,
+      status: status,
+      approvalMessage: approvalMessage
     });
-    
+
     // Increment user's post count
     await User.findByIdAndUpdate(req.user.id, {
       $inc: { postCount: 1 }
     });
-    
+
     res.status(201).json({
       success: true,
-      message: 'Product submitted for approval',
+      message: req.user.role === 'admin' 
+        ? 'Product created and approved successfully' 
+        : 'Product submitted for approval',
       product: {
         id: product._id,
         title: product.title,
@@ -47,10 +57,10 @@ exports.createProduct = async (req, res) => {
         createdAt: product.createdAt
       }
     });
-    
+
   } catch (error) {
     console.error('Create product error:', error);
-    
+
     // Delete uploaded images if error occurs
     if (req.files) {
       req.files.forEach(file => {
@@ -58,7 +68,7 @@ exports.createProduct = async (req, res) => {
         cloudinary.uploader.destroy(publicId);
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Error creating product',
@@ -66,6 +76,7 @@ exports.createProduct = async (req, res) => {
     });
   }
 };
+
 
 // @desc    Get approved products for users
 // @route   GET /api/products
@@ -166,28 +177,25 @@ exports.getApprovedProducts = async (req, res) => {
 exports.markAsSold = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    
+
     if (!product) {
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found'
-      });
+      return res.status(404).json({ success: false, message: 'Product not found' });
     }
-    
-    // Check if user is the one who posted this product or admin
+
+    if (!product.postedBy) {
+      return res.status(500).json({ success: false, message: 'Product missing postedBy field' });
+    }
+
     if (product.postedBy.toString() !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to mark this product as sold'
-      });
+      return res.status(403).json({ success: false, message: 'Not authorized' });
     }
-    
+
     product.status = 'sold';
     product.isActive = false;
     product.soldAt = new Date();
-    
+
     await product.save();
-    
+
     res.json({
       success: true,
       message: 'Product marked as sold',
@@ -198,15 +206,13 @@ exports.markAsSold = async (req, res) => {
         soldAt: product.soldAt
       }
     });
-    
+
   } catch (error) {
     console.error('Mark as sold error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error marking product as sold'
-    });
+    res.status(500).json({ success: false, message: 'Error marking product as sold', error: error.message });
   }
 };
+
 
 // @desc    Get single product by ID
 // @route   GET /api/products/:id

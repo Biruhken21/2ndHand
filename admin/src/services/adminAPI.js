@@ -63,6 +63,7 @@ export const adminAPI = {
     API.put(`/admin/products/${id}/approve`, { action, reason }),
   getAllProducts: (params) => API.get('/admin/products', { params }),
   deleteProduct: (id) => API.delete(`/admin/products/${id}`),
+  createProduct: (productData) => API.post('/admin/products', productData), 
   
   // ========== USERS ==========
   getAllUsers: (params) => API.get('/admin/users', { params }),

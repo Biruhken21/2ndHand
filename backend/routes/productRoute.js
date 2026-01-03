@@ -29,6 +29,6 @@ router.get('/user/my-products', protect, getMyProducts); // NEW - for current us
 router.get('/user/:userId', protect, getProductsByUser); // For other users (admin/optional)
 
 // Mark as sold
-router.put('/:id/sold', markAsSold);
+router.put('/:id/sold', protect, markAsSold);
 
 module.exports = router;

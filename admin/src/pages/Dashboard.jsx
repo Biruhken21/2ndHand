@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {Link} from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { adminAPI } from '../services/adminAPI';
 import StatsCards from '../components/dashboard/StatsCards';
@@ -55,18 +56,41 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-2">Welcome to your admin control panel</p>
         </div>
-        <div className="mt-4 md:mt-0">
+
+        {/* Buttons */}
+        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+
+          {/* Add Product */}
+          <Link
+            to="/admin/post-product"
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg font-medium hover:bg-purple-100 transition-colors"
+          >
+            Add Product
+          </Link>
+
+          {/* Add Ads */}
+          <Link
+            to="/admin/post-ads"
+            className="px-4 py-2 bg-green-50 text-green-600 rounded-lg font-medium hover:bg-green-100 transition-colors"
+          >
+            Add Ads
+          </Link>
+          {/* Refresh Data */}
           <button
             onClick={loadDashboardData}
-            className="px-4 py-2 bg-primary-50 text-primary-600 rounded-lg font-medium hover:bg-primary-100 transition-colors"
+            className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium hover:bg-blue-100 transition-colors"
           >
             Refresh Data
           </button>
+
+          
+
+          
         </div>
       </div>
 
@@ -97,7 +121,7 @@ const Dashboard = () => {
           <>
             <StatsCards stats={stats} />
             <QuickStats stats={stats} />
-            
+
             {/* Recent Activity */}
             <div className="card">
               <div className="flex items-center justify-between mb-6">
@@ -106,7 +130,7 @@ const Dashboard = () => {
                   View All Activity
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 {[
                   { action: 'Product approved', user: 'iPhone 13 Pro', time: 'Just now' },

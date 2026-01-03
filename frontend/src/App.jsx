@@ -10,6 +10,7 @@ import Profile from './pages/Profile.jsx';
 import ShareProductPage from '/src/pages/ShareProductPage.jsx';  
 import Favorites from '/src/pages/Favorite.jsx';
 import Notifications from '/src/pages/Notification.jsx';
+import EditProducts from '/src/pages/EditProduct.jsx';
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/product/:id" element={<ShareProductPage />} />
         <Route path="/favorites" element={isAuthenticated ? <Favorites /> : <Navigate to="/" />} />
         <Route path="/notifications" element={isAuthenticated ? <Notifications /> : <Navigate to="/" />} />
+        <Route path="/product/:id/edit" element={isAuthenticated ? <EditProducts/> : <Navigate to="/" />} />
       </Routes>
     </div>
   );

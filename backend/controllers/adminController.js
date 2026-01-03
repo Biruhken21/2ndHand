@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const User = require('../models/User');
+const Notification = require('../models/Notification.js')
  const Inquiry = require('../models/Inquiry');
 const mongoose = require('mongoose');
 
@@ -68,6 +69,7 @@ exports.getPendingProducts = async (req, res) => {
  //   PUT /api/admin/products/:id/approve
  //  Private/Admin
  
+
 exports.approveProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -83,9 +85,8 @@ exports.approveProduct = async (req, res) => {
       });
     }
 
-    // Find and validate product
-    const product = await Product.findById(id)
-      .populate('postedBy', 'name email phone');
+    // Find the product and populate the poster
+    const product = await Product.findById(id).populate('postedBy', 'name email _id');
 
     if (!product) {
       return res.status(404).json({
@@ -101,20 +102,45 @@ exports.approveProduct = async (req, res) => {
       });
     }
 
-    // Update product based on action
+    // Update product status
+    let notificationType = '';
+    let notificationTitle = '';
+    let notificationMessage = '';
+
     if (action === 'approve') {
       product.status = 'approved';
       product.approvedAt = new Date();
       product.isActive = true;
       product.approvalMessage = reason || 'Product approved by admin';
+
+      notificationType = 'product_approved';
+      notificationTitle = 'Product Approved';
+      notificationMessage = `Your product "${product.title}" has been approved ✅.`;
     } else {
       product.status = 'rejected';
       product.rejectedAt = new Date();
       product.isActive = false;
       product.rejectionReason = reason || 'Product rejected by admin';
+
+      notificationType = 'product_rejected';
+      notificationTitle = 'Product Rejected';
+      notificationMessage = `Your product "${product.title}" has been rejected ❌. Reason: ${reason || 'Not specified'}`;
     }
 
     await product.save();
+
+    // Create a notification for the user
+    if (product.postedBy && product.postedBy._id) {
+      await Notification.create({
+        user: product.postedBy._id,
+        type: notificationType,
+        title: notificationTitle,
+        message: notificationMessage,
+        data: {
+          productId: product._id
+        }
+      });
+    }
 
     console.log(`✅ Product ${action}ed: ${product.title}`);
 
@@ -133,11 +159,8 @@ exports.approveProduct = async (req, res) => {
       }
     };
 
-    if (action === 'approve') {
-      response.product.approvedAt = product.approvedAt;
-    } else {
-      response.product.rejectedAt = product.rejectedAt;
-    }
+    if (action === 'approve') response.product.approvedAt = product.approvedAt;
+    else response.product.rejectedAt = product.rejectedAt;
 
     res.status(200).json(response);
 
@@ -442,6 +465,77 @@ exports.getAllInquiries = async (req, res) => {
       success: false,
       message: 'Server error while fetching inquiries',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// post product cpntroller
+exports.createProduct = async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Please login to post products'
+      });
+    }
+
+    // Determine product status based on role
+    let status = 'pending';
+    let approvalMessage = 'Your product is under review. It will be approved within 24 hours.';
+    
+    if (req.user.role === 'admin') {
+      status = 'approved';
+      approvalMessage = 'Product approved automatically as admin.';
+    }
+
+    // Get image URLs from Cloudinary
+    const images = req.files.map(file => file.path);
+
+    // Create product
+    const product = await Product.create({
+      ...req.body,
+      images: images,
+      postedBy: req.user.id,
+      status: status,
+      approvalMessage: approvalMessage
+    });
+
+    // Increment user's post count
+    await User.findByIdAndUpdate(req.user.id, {
+      $inc: { postCount: 1 }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: req.user.role === 'admin' 
+        ? 'Product created and approved successfully' 
+        : 'Product submitted for approval',
+      product: {
+        id: product._id,
+        title: product.title,
+        status: product.status,
+        approvalMessage: product.approvalMessage,
+        images: product.images,
+        createdAt: product.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Create product error:', error);
+
+    // Delete uploaded images if error occurs
+    if (req.files) {
+      req.files.forEach(file => {
+        const publicId = file.filename;
+        cloudinary.uploader.destroy(publicId);
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Error creating product',
+      error: error.message
     });
   }
 };
