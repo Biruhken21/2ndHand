@@ -17,9 +17,22 @@ mongoose.connect('mongodb://localhost:27017/userproduct')
   .catch(err => console.log('❌ MongoDB Error:', err));
 
 // CORS
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+];
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin} not allowed`));
+    }
+  },
+  credentials: true,
 }));
 
 // Body parser
